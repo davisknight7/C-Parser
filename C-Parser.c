@@ -31,10 +31,6 @@ int main() {
                     break;
                 }
             } else {
-                if (currentChar == '{' || currentChar == '}' || currentChar == '(' || currentChar == ')' || currentChar == '[' || currentChar == ']') {
-
-                    }
-
                 switch (currentChar) {
                     case '{':
 
