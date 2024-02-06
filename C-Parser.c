@@ -12,8 +12,8 @@ bool validPair(char c1, char c2)
     return (c1 == '{' && c2 == '}') || (c1 == '(' && c2 == ')') || (c1 == '[' && c2 == ']');
 }
 
-//code works for the most part, passes on all the tests except for btest, gtest, and extra credit.  
-//For btest and gtest it mostly outputs the correct answer but it also outputs an additional incorrect set of { } as invalid
+//code works for all of the test files provided, but does not detected {(}) / ({)} correctly.
+//extra credit not yet implemented.
 bool validSyntax(char c[], int lines[], int p)
 {
     bool valid=true;
@@ -29,8 +29,26 @@ bool validSyntax(char c[], int lines[], int p)
             stack[++top] = currentChar;
             lineStack[top] = currentLine;
         } else if (currentChar == '}' || currentChar == ']' || currentChar == ')') {
-            if (top == -1 || !validPair(stack[top], currentChar)) {
-                printf("Error: Invalid %c on line %d\n", currentChar, i + 1);
+            if (top == -1){
+                printf("Error: Invalid %c on line %d\n", currentChar, currentLine);
+                valid=false;
+            }else if(!validPair(stack[top], currentChar)) {
+                int match = -1;
+                for(int i=top-1;i>=0;i--){
+                    if(validPair(stack[i],currentChar)){
+                        match=i;
+                        break;
+                    }
+                }
+                if(match>-1){
+                    for(int i=top;i>match;i--){
+                        printf("Error: Invalid %c on line %d\n",stack[i],lineStack[i]);
+                        top--;
+                    }
+                    top--;
+                }else{
+                    printf("Error: Invalid %c on line %d\n", currentChar, currentLine);
+                }
                 valid=false;
             } else {
                 top--;
