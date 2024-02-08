@@ -12,53 +12,69 @@ bool validPair(char c1, char c2)
     return (c1 == '{' && c2 == '}') || (c1 == '(' && c2 == ')') || (c1 == '[' && c2 == ']');
 }
 
-//code works for all of the test files provided, but does not detected {(}) / ({)} correctly.
-//extra credit not yet implemented.
+// code works for all of the test files provided, but does not detect {(}) / ({)} correctly.
+// extra credit not yet implemented.
 bool validSyntax(char c[], int lines[], int p)
 {
-    bool valid=true;
+    bool valid = true;
     char stack[1000];
     int lineStack[1000];
     int top = -1;
 
-    for (int i = 0; c[i] != '\0'; i++) {
+    for (int i = 0; c[i] != '\0'; i++)
+    {
         char currentChar = c[i];
         int currentLine = lines[i];
 
-        if (currentChar == '{' || currentChar == '[' || currentChar == '(') {
+        if (currentChar == '{' || currentChar == '[' || currentChar == '(')
+        {
             stack[++top] = currentChar;
             lineStack[top] = currentLine;
-        } else if (currentChar == '}' || currentChar == ']' || currentChar == ')') {
-            if (top == -1){
+        }
+        else if (currentChar == '}' || currentChar == ']' || currentChar == ')')
+        {
+            if (top == -1)
+            {
                 printf("Error: Invalid %c on line %d\n", currentChar, currentLine);
-                valid=false;
-            }else if(!validPair(stack[top], currentChar)) {
+                valid = false;
+            }
+            else if (!validPair(stack[top], currentChar))
+            {
                 int match = -1;
-                for(int i=top-1;i>=0;i--){
-                    if(validPair(stack[i],currentChar)){
-                        match=i;
+                for (int i = top - 1; i >= 0; i--)
+                {
+                    if (validPair(stack[i], currentChar))
+                    {
+                        match = i;
                         break;
                     }
                 }
-                if(match>-1){
-                    for(int i=top;i>match;i--){
-                        printf("Error: Invalid %c on line %d\n",stack[i],lineStack[i]);
+                if (match > -1)
+                {
+                    for (int i = top; i > match; i--)
+                    {
+                        printf("Error: Invalid %c on line %d\n", stack[i], lineStack[i]);
                         top--;
                     }
                     top--;
-                }else{
+                }
+                else
+                {
                     printf("Error: Invalid %c on line %d\n", currentChar, currentLine);
                 }
-                valid=false;
-            } else {
+                valid = false;
+            }
+            else
+            {
                 top--;
             }
         }
     }
 
-    while (top != -1) {
+    while (top != -1)
+    {
         printf("Error: Unmatched %c on line %d\n", stack[top--], lineStack[top]);
-        valid=false;
+        valid = false;
     }
 
     return valid;
@@ -92,6 +108,8 @@ int main()
         }
     }
 
+    bool inString = false;
+    bool comment = false;
     while (fgets(fileLine, 1000, file) != NULL)
     {
         line++;
@@ -102,23 +120,50 @@ int main()
             {
                 break;
             }
-            else if (currentChar == '/')
+            else if (currentChar == '/' && !inString)
             {
                 if (fileLine[i + 1] == '/')
                 {
                     break;
                 }
+                else if(fileLine[i+1]== '*')
+                {
+                    switch (comment)
+                    {
+                    case true:
+                        printf("close comment\n");//remove before submission
+                        comment=false;
+                        break;
+                    
+                    case false:
+                        printf("enter comment\n");//remove before submission
+                        comment=true;
+                        break;
+                    }
+                }
             }
-            else if (containsChar(currentChar))
+            else if ((currentChar == '\''||currentChar == '\"')&& !comment)
             {
-                checked[current] = currentChar;
+                if (!inString)
+                {
+                    printf("enter string\n");//remove before submission
+                    inString = true;
+                }
+                else if (fileLine[i - 1] != '\\'||(fileLine[i - 1] == '\\' && fileLine[i - 1] == '\\'))
+                {
+                    printf("close string\n");//remove before submission
+                    inString = false;
+                }
+            }
+            else if (containsChar(currentChar) && !inString && !comment)
+            {
+                checked[++current] = currentChar;
                 checkedLines[current] = line;
-                current++;
             }
         }
     }
 
- //this should be removed before submission, it's just here to test the code.
+    // this should be removed before submission, it's just here to test the code.
     bool valid = validSyntax(checked, checkedLines, current);
     if (!valid)
     {
